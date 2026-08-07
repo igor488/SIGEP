@@ -1,0 +1,14 @@
+﻿body {
+    background: linear-gradient(135deg, #0f172a, #2563eb);
+    color: white;
+}
+
+.login-box {
+    max-width: 420px;
+    margin: 100px auto;
+    padding: 30px;
+    background: white;
+    color: #111;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
