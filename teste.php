@@ -6,8 +6,8 @@ try {
 
     $pdo = new PDO(
         "mysql:host=localhost;dbname=sigep;charset=utf8mb4",
-        "igor",
-        "@Salgado123"
+        "root",
+        ""
     );
 
     echo "Conectado com sucesso!";

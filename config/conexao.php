@@ -1,9 +1,9 @@
 ﻿<?php
 
-$host = "127.0.0.1:3406";
+$host = "localhost";
 $banco = "sigep";
-$usuario = "admin.igor";
-$senha = "@Salgado123";
+$usuario = "root";
+$senha = "";
 
 try{
 

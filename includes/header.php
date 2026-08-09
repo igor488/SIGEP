@@ -25,4 +25,4 @@ if(session_status() == PHP_SESSION_NONE){
 
 </head>
 
-<body></body>
+<body class="app-shell">

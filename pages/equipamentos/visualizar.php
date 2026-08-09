@@ -1,5 +1,6 @@
 <?php
 
+
 include("../../config/auth.php");
 include("../../config/conexao.php");
 
@@ -25,7 +26,10 @@ LEFT JOIN setores s
 ON s.id=e.setor_id
 
 WHERE e.id=?
+
+
 ");
+
 
 $sql->execute([$id]);
 
@@ -37,4 +41,17 @@ die("Equipamento não encontrado.");
 
 }
 
+
+
 ?>
+
+
+<a
+    href="etiqueta.php?id=<?= $eq['id']; ?>"
+    target="_blank"
+    class="btn btn-dark"
+>
+
+    Imprimir etiqueta
+
+</a>

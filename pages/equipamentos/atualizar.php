@@ -3,248 +3,127 @@
 include("../../config/auth.php");
 include("../../config/conexao.php");
 
-$id = $_GET['id'] ?? 0;
+$id = $_POST['id'] ?? 0;
 
-$sql = $pdo->prepare("
-SELECT
+$tipo_id = $_POST['tipo_id'] ?? null;
 
-e.*,
+$setor_id = !empty($_POST['setor_id'])
+    ? $_POST['setor_id']
+    : null;
 
-t.nome tipo,
+$marca = trim($_POST['marca'] ?? '');
 
-t.prefixo,
+$modelo = trim($_POST['modelo'] ?? '');
 
-s.nome setor
+$numero_serie = trim($_POST['numero_serie'] ?? '');
 
-FROM equipamentos e
+$processador = trim($_POST['processador'] ?? '');
 
-INNER JOIN tipos t
-ON t.id=e.tipo_id
+$memoria = trim($_POST['memoria'] ?? '');
 
-LEFT JOIN setores s
-ON s.id=e.setor_id
+$armazenamento = trim($_POST['armazenamento'] ?? '');
 
-WHERE e.id=?
+$sistema_operacional = trim(
+    $_POST['sistema_operacional'] ?? ''
+);
+
+$patrimonio_antigo = trim(
+    $_POST['patrimonio_antigo'] ?? ''
+);
+
+$status = $_POST['status'] ?? 'Estoque';
+
+$observacoes = trim(
+    $_POST['observacoes'] ?? ''
+);
+
+
+// Verifica se o equipamento existe
+$verifica = $pdo->prepare("
+    SELECT patrimonio
+    FROM equipamentos
+    WHERE id = ?
+    AND ativo = 1
 ");
 
-$sql->execute([$id]);
+$verifica->execute([$id]);
 
-$eq = $sql->fetch(PDO::FETCH_ASSOC);
+$equipamento = $verifica->fetch(PDO::FETCH_ASSOC);
 
-if(!$eq){
+if (!$equipamento) {
 
-die("Equipamento não encontrado.");
+    die("Equipamento não encontrado.");
 
 }
 
 
-
-?>
-
-<div class="container mt-4">
-
-<div class="card shadow">
-
-<div class="card-header bg-primary text-white">
-
-<h3>
-
-<?= $eq['patrimonio']; ?>
-
-</h3>
-
-</div>
-
-<div class="card-body">
-
-<div class="row">
-
-<div class="col-md-6">
-
-<h5>Informações Gerais</h5>
-
-<table class="table">
-
-<tr>
-
-<th>Tipo</th>
-
-<td><?= $eq['tipo']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Setor</th>
-
-<td><?= $eq['setor'] ?: "Estoque"; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Status</th>
-
-<td><?= $eq['status']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Marca</th>
-
-<td><?= $eq['marca']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Modelo</th>
-
-<td><?= $eq['modelo']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Número de Série</th>
-
-<td><?= $eq['numero_serie']; ?></td>
-
-</tr>
-
-</table>
-
-</div>
-
-<div class="col-md-6">
-
-<h5>Hardware</h5>
-
-<table class="table">
-
-<tr>
-
-<th>Processador</th>
-
-<td><?= $eq['processador']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Memória</th>
-
-<td><?= $eq['memoria']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Armazenamento</th>
-
-<td><?= $eq['armazenamento']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Sistema</th>
-
-<td><?= $eq['sistema_operacional']; ?></td>
-
-</tr>
-
-<tr>
-
-<th>Patrimônio Antigo</th>
-
-<td><?= $eq['patrimonio_antigo']; ?></td>
-
-</tr>
-
-</table>
-
-</div>
-
-</div>
-
-<hr>
-
-<h5>Observações</h5>
-
-<hr>
-
-<h4>Histórico</h4>
-
-<?php
-
-$hist = $pdo->prepare("
-SELECT *
-
-FROM historico
-
-WHERE equipamento_id=?
-
-ORDER BY data_hora DESC
+// Atualiza equipamento
+$sql = $pdo->prepare("
+    UPDATE equipamentos
+    SET
+
+        tipo_id = ?,
+        setor_id = ?,
+        marca = ?,
+        modelo = ?,
+        numero_serie = ?,
+        processador = ?,
+        memoria = ?,
+        armazenamento = ?,
+        sistema_operacional = ?,
+        patrimonio_antigo = ?,
+        status = ?,
+        observacoes = ?
+
+    WHERE id = ?
 ");
 
-$hist->execute([$id]);
+$sql->execute([
 
-?>
+    $tipo_id,
+    $setor_id,
+    $marca,
+    $modelo,
+    $numero_serie,
+    $processador,
+    $memoria,
+    $armazenamento,
+    $sistema_operacional,
+    $patrimonio_antigo,
+    $status,
+    $observacoes,
+    $id
 
-<table class="table table-striped">
+]);
 
-<thead>
 
-<tr>
+// Registra alteração no histórico
+$historico = $pdo->prepare("
+    INSERT INTO historico
+    (
+        equipamento_id,
+        acao,
+        usuario,
+        descricao
+    )
+    VALUES (?, ?, ?, ?)
+");
 
-<th>Data</th>
+$historico->execute([
 
-<th>Ação</th>
+    $id,
 
-<th>Usuário</th>
+    "Alteração",
 
-<th>Descrição</th>
+    $_SESSION['usuario'],
 
-</tr>
+    "Dados do equipamento {$equipamento['patrimonio']} foram alterados."
 
-</thead>
+]);
 
-<tbody>
 
-<?php
+header(
+    "Location: visualizar.php?id=" . $id
+);
 
-foreach($hist as $h){
-
-?>
-
-<tr>
-
-<td><?= date('d/m/Y H:i',strtotime($h['data_hora'])) ?></td>
-
-<td><?= $h['acao'] ?></td>
-
-<td><?= $h['usuario'] ?></td>
-
-<td><?= $h['descricao'] ?></td>
-
-</tr>
-
-<?php } ?>
-
-</tbody>
-
-</table>
-
-<div class="border rounded p-3 bg-light">
-
-<?= nl2br(htmlspecialchars($eq['observacoes'])); ?>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+exit;
