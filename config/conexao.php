@@ -1,22 +1,25 @@
 ﻿<?php
 
-$host = "localhost";
+$host = "127.0.0.1";
+$porta = "8080";
 $banco = "sigep";
 $usuario = "root";
 $senha = "";
 
-try{
+try {
 
     $pdo = new PDO(
-        "mysql:host=$host;dbname=$banco;charset=utf8",
+        "mysql:host=$host;port=$porta;dbname=$banco;charset=utf8",
         $usuario,
         $senha
     );
 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-}catch(PDOException $e){
+    echo "Conexão realizada com sucesso!";
 
-    die("Erro: ".$e->getMessage());
+} catch (PDOException $e) {
+
+    die("Erro na conexão: " . $e->getMessage());
 
 }

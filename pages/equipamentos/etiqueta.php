@@ -111,10 +111,10 @@ $barcode = $generator->getBarcode(
 
         }
 
-        <blade media|%20print%20%7B%0D>button {
-            display: none;
-        }
-
+        @media print {
+            button {
+                display: none;
+            }
         }
     </style>
 
